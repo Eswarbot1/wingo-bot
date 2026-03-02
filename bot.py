@@ -1,4 +1,5 @@
 import requests
+import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -19,19 +20,40 @@ def classify(number):
     number = int(number)
     return "BIG" if number >= 5 else "SMALL"
 
-
 def get_last_10():
-    response = requests.get(HISTORY_API)
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
+
+    ts = int(time.time() * 1000)
+    url = f"{HISTORY_API}?_={ts}"
+
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+
     data = response.json()
-    results = data["data"]["list"]
-    numbers = [int(item["number"]) for item in results]
+    results = data.get("data", {}).get("list", [])
+
+    numbers = [int(item["number"]) for item in results[:10]]
     return numbers
 
 
 def get_current_issue():
-    response = requests.get(CURRENT_API)
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
+
+    ts = int(time.time() * 1000)
+    url = f"{CURRENT_API}?_={ts}"
+
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+
     data = response.json()
-    return data["current"]["issueNumber"]
+    return data.get("current", {}).get("issueNumber", "Unknown")
+
 
 
 def predict(numbers):
