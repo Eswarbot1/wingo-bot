@@ -110,20 +110,6 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(button_click))
 
 
-import threading
-from flask import Flask
-import os
-
-app_flask = Flask(__name__)
-
-@app_flask.route("/")
-def home():
-    return "Bot is running"
-
-def run_bot():
-    app.run_polling()
-
 if __name__ == "__main__":
     print("Bot is starting...")
-    threading.Thread(target=run_bot).start()
-    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    app.run_polling()
